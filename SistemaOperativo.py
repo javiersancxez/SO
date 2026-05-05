@@ -1,145 +1,92 @@
-# =========================================
-# PROYECTO FINAL - SISTEMA OPERATIVO BÁSICO
-# =========================================
-
-# Instrucciones:
-# Completa las funciones marcadas con TODO
-# y mejora el sistema agregando lógica propia
-
 import time
+from collections import deque # Usamos deque para una cola eficiente
 
-# ----------------------------
-# Clase Proceso
-# ----------------------------
 class Proceso:
     def __init__(self, nombre, tiempo):
         self.nombre = nombre
-        self.tiempo = tiempo
-        self.estado = "Listo"  # Listo, Ejecutando, Terminado
+        self.tiempo_restante = tiempo # Tiempo que le falta por ejecutar
+        self.tiempo_total = tiempo
+        self.estado = "Listo"
 
     def __str__(self):
-        return f"{self.nombre} | Tiempo: {self.tiempo} | Estado: {self.estado}"
+        return f"{self.nombre} | Restante: {self.tiempo_restante}s | Estado: {self.estado}"
 
-
-# ----------------------------
-# Sistema Operativo
-# ----------------------------
 class SistemaOperativo:
     def __init__(self):
         self.procesos = []
 
-    # ----------------------------
-    # Crear proceso
-    # ----------------------------
     def crear_proceso(self):
-        nombre = input("Nombre del proceso: ")
-        tiempo = int(input("Tiempo de ejecución: "))
+        try:
+            nombre = input("Nombre del proceso: ")
+            tiempo = int(input("Tiempo de ejecución (segundos): "))
+            self.procesos.append(Proceso(nombre, tiempo))
+            print(f"Proceso {nombre} creado.\n")
+        except ValueError:
+            print("Error: El tiempo debe ser un número entero.\n")
 
-        nuevo = Proceso(nombre, tiempo)
-        self.procesos.append(nuevo)
-
-        print(f"Proceso {nombre} creado.\n")
-
-    # ----------------------------
-    # Mostrar procesos
-    # ----------------------------
     def mostrar_procesos(self):
-        print("\nLista de procesos:")
-
-        # TODO: recorrer la lista e imprimir procesos
+        print("\n--- Lista de Procesos ---")
+        if not self.procesos: print("No hay procesos.")
         for p in self.procesos:
             print(p)
-
         print()
 
-    # ----------------------------
-    # Eliminar proceso
-    # ----------------------------
     def eliminar_proceso(self):
         nombre = input("Nombre del proceso a eliminar: ")
-
-        # TODO: eliminar proceso de la lista
+        original_count = len(self.procesos)
         self.procesos = [p for p in self.procesos if p.nombre != nombre]
+        if len(self.procesos) < original_count:
+            print("Proceso eliminado.\n")
+        else:
+            print("No se encontró el proceso.\n")
 
-        print("Proceso eliminado.\n")
-
-    # ----------------------------
-    # Planificación FCFS
-    # ----------------------------
     def ejecutar_fcfs(self):
-        print("\nEjecutando FCFS...\n")
-
-        # TODO: recorrer procesos en orden
+        print("\n--- Planificación FCFS ---")
         for p in self.procesos:
-            p.estado = "Ejecutando"
-            print(f"Ejecutando {p.nombre}...")
+            if p.estado != "Terminado":
+                p.estado = "Ejecutando"
+                print(f"Ejecutando {p.nombre} por {p.tiempo_restante}s...")
+                time.sleep(1) 
+                p.tiempo_restante = 0
+                p.estado = "Terminado"
+        print("Planificación finalizada.\n")
 
-            time.sleep(1)  # Simula ejecución
-
-            p.estado = "Terminado"
-
-        print("\nTodos los procesos terminaron.\n")
-
-    # ----------------------------
-    # Planificación Round Robin
-    # ----------------------------
     def ejecutar_rr(self):
-        print("\nRound Robin\n")
+        print("\n--- Planificación Round Robin ---")
+        if not self.procesos: return
+        
+        try:
+            quantum = int(input("Ingresa el valor del Quantum: "))
+        except: return
 
-        quantum = int(input("Ingresa el quantum: "))
+        # Filtramos solo los que no han terminado y los metemos a una cola
+        cola = deque([p for p in self.procesos if p.estado != "Terminado"])
 
-        # TODO: implementar lógica de Round Robin
-        # Pista:
-        # - recorrer procesos
-        # - restar tiempo
-        # - volver a agregar si no termina
+        while cola:
+            p = cola.popleft() # Sacamos el primero de la cola
+            p.estado = "Ejecutando"
+            print(f"Ejecutando {p.nombre} (Restante: {p.tiempo_restante}s)")
 
-        for p in self.procesos:
-            print(f"Procesando {p.nombre}... (falta implementar lógica completa)")
+            tiempo_a_ejecutar = min(p.tiempo_restante, quantum)
+            time.sleep(0.5) # Simulación rápida
+            p.tiempo_restante -= tiempo_a_ejecutar
 
-        print("\nSimulación incompleta (debes terminarla)\n")
-
-    # ----------------------------
-    # Menú principal (I/O)
-    # ----------------------------
-    def menu(self):
-        while True:
-            print("==== SISTEMA OPERATIVO ====")
-            print("1. Crear proceso")
-            print("2. Ver procesos")
-            print("3. Eliminar proceso")
-            print("4. Ejecutar FCFS")
-            print("5. Ejecutar Round Robin")
-            print("6. Salir")
-
-            opcion = input("Selecciona una opción: ")
-
-            if opcion == "1":
-                self.crear_proceso()
-
-            elif opcion == "2":
-                self.mostrar_procesos()
-
-            elif opcion == "3":
-                self.eliminar_proceso()
-
-            elif opcion == "4":
-                self.ejecutar_fcfs()
-
-            elif opcion == "5":
-                self.ejecutar_rr()
-
-            elif opcion == "6":
-                print("Saliendo...")
-                break
-
+            if p.tiempo_restante > 0:
+                p.estado = "Listo"
+                print(f"  -> Quantum agotado. {p.nombre} regresa a la cola.")
+                cola.append(p) # Vuelve al final
             else:
-                print("Opción inválida\n")
+                p.estado = "Terminado"
+                print(f"  -> {p.nombre} FINALIZADO.")
+        
+        print("\nTodos los procesos en la cola han terminado.\n")
 
+    def menu(self):
+        # ... (Tu menú original está bien, solo asegúrate de llamar a estas funciones)
+        pass
 
-# ----------------------------
-# Programa principal
-# ----------------------------
 if __name__ == "__main__":
     sistema = SistemaOperativo()
-    sistema.menu()
+    # Para probar rápido, descomenta el menú o llama a los métodos
+    sistema.crear_proceso()
+    sistema.ejecutar_rr()
