@@ -5,7 +5,7 @@ import threading
 import time
 
 
-# ─── CLASE PROCESO (PCB) ───────────────────────────────────────────────────────
+#PROCESO
 
 class Proceso:
     def __init__(self, nombre, tiempo):
@@ -15,7 +15,7 @@ class Proceso:
         self.estado = "LISTO"
 
 
-# ─── INTERFAZ GRÁFICA ──────────────────────────────────────────────────────────
+#INTERFAZ GRAFICA
 
 class KernelSimulatorApp:
     # Paleta de colores (tema oscuro tipo terminal)
@@ -42,8 +42,6 @@ class KernelSimulatorApp:
 
         self._build_ui()
         self._log("Sistema iniciado. Listo.", color=self.FG_GREEN)
-
-    # ── CONSTRUCCIÓN DE LA UI ─────
 
     def _build_ui(self):
         # Barra de título
@@ -115,7 +113,8 @@ class KernelSimulatorApp:
         btn.bind("<Leave>", lambda e: btn.config(bg=self.BG_PANEL))
         return btn
 
-    # ── PANEL IZQUIERDO ────────────────────────────────────────────────────────
+
+    #CONSTRUCCION PANEL
 
     def _build_left(self, parent):
         left = tk.Frame(parent, bg=self.BG_DARK)
@@ -124,7 +123,7 @@ class KernelSimulatorApp:
         left.rowconfigure(1, weight=0)
         left.rowconfigure(2, weight=0)
 
-        # ── Crear proceso
+        #CREACION DE PROCESO
         p_crear = tk.LabelFrame(left, text="  CREAR PROCESO  ",
                                 fg=self.FG_GRAY, bg=self.BG_PANEL,
                                 font=("Courier New", 8), relief="flat",
@@ -142,7 +141,7 @@ class KernelSimulatorApp:
 
         self._btn(p_crear, "+ CREAR PROCESO", self.crear_proceso).pack(fill="x")
 
-        # ── Eliminar proceso
+        #ELIMINACION DE PROCESO
         p_del = tk.LabelFrame(left, text="  ELIMINAR PROCESO  ",
                               fg=self.FG_GRAY, bg=self.BG_PANEL,
                               font=("Courier New", 8), relief="flat",
@@ -159,7 +158,7 @@ class KernelSimulatorApp:
         self._btn(p_del, "× ELIMINAR", self.eliminar_proceso,
                   color=self.FG_RED, hover="#1a0606").pack(fill="x")
 
-        # ── Planificación
+        #PLANIFICACION
         p_sched = tk.LabelFrame(left, text="  PLANIFICACIÓN  ",
                                 fg=self.FG_GRAY, bg=self.BG_PANEL,
                                 font=("Courier New", 8), relief="flat",
@@ -176,7 +175,7 @@ class KernelSimulatorApp:
         self._btn(p_sched, "↺  EJECUTAR ROUND ROBIN", self.ejecutar_rr,
                   color=self.FG_BLUE, hover="#1e1b4b").pack(fill="x")
 
-    # ── PANEL DERECHO ─────────
+    #CONSTRUCCION PANEL 
 
     def _build_right(self, parent):
         right = tk.Frame(parent, bg=self.BG_DARK)
@@ -184,7 +183,7 @@ class KernelSimulatorApp:
         right.rowconfigure(0, weight=1)
         right.rowconfigure(1, weight=0)
 
-        # Tabla PCB
+     
         p_pcb = tk.LabelFrame(right, text="  TABLA DE PROCESOS (PCB)  ",
                               fg=self.FG_GRAY, bg=self.BG_PANEL,
                               font=("Courier New", 8), relief="flat",
@@ -236,8 +235,6 @@ class KernelSimulatorApp:
         self.log_text.tag_config("err",  foreground=self.FG_RED)
         self.log_text.tag_config("info", foreground=self.FG_BLUE)
 
-    # ── HELPERS ────────────────────────────────────────────────────────────────
-
     def _style_combobox(self):
         style = ttk.Style()
         style.theme_use("default")
@@ -274,13 +271,13 @@ class KernelSimulatorApp:
             ), tags=(p.estado,))
             self.tree.tag_configure(p.estado, foreground=color)
 
-        # Actualizar combobox de eliminación
+      
         nombres = [p.nombre for p in self.procesos if p.estado != "TERMINADO"]
         self.combo_del["values"] = nombres
         if self.var_del.get() not in nombres:
             self.var_del.set("")
 
-    # ── LÓGICA DEL SISTEMA ─────────────────────────────────────────────────────
+  #SISTEMA CRUD
 
     def crear_proceso(self):
         if self.corriendo:
@@ -345,7 +342,7 @@ class KernelSimulatorApp:
         self.root.after(0, self._log, "--- FCFS completado ---", self.FG_BLUE)
         self.corriendo = False
 
-    # ── ROUND ROBIN ───────────────────────────────────────────────────────────
+    #PROCESO ROUND ROBIN
 
     def ejecutar_rr(self):
         if self.corriendo:
